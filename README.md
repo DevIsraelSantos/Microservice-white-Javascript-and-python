@@ -1,4 +1,4 @@
-# Microservice-white-Javascript-and-python
+# Microservice-with-Javascript-and-python
 Microservice with python, nodeJs, docker and kafka
 
 Este projeto foi criado para realizar a conexão entre JavaScript e Python
