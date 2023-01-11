@@ -12,3 +12,20 @@ services:
 
     environment:
       - EXTERNALPORT=3000
+
+    volumes:
+      - files:/app/files
+
+  pythonapp:
+    container_name: pythonapp
+    image: pythonapp
+    build:
+      context: python
+
+    ports:
+      - '80:80'
+    volumes:
+      - files:/app/files
+
+volumes:
+  files: {}
