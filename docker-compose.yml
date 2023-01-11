@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  appjs:
+    container_name: appjs
+    image: appjs
+
+    build:
+      context: js
+    ports:
+      - '3000:3000'
+
+    environment:
+      - EXTERNALPORT=3000
