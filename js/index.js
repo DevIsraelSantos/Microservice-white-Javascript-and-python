@@ -1,11 +1,19 @@
 const express = require('express');
-
+const path = require('path');
+const fs = require('fs');
 const app = express();
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-	res.status(200).json('Listando arquivos');
+app.get('/', async (req, res) => {
+	const files = fs.readdirSync('./files');
+	const output = files.map((name) => {
+		const fullPath = './files/' + name;
+		const content = fs.readFileSync(fullPath, { encoding: 'utf8' });
+		return { file: name, content };
+	});
+
+	return res.status(200).json(output);
 });
 
 app.post('/', async (req, res) => {
@@ -18,4 +26,4 @@ app.post('/', async (req, res) => {
 	}
 });
 
-app.listen(process.env.EXTERNALPORT, () => console.log(`Server listening at http://localhost:${process.env.EXTERNALPORT}`));
+app.listen(process.env.EXTERNALPORT || 3000, () => console.log(`Server listening at http://localhost:${process.env.EXTERNALPORT || 3000}`));

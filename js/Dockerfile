@@ -2,6 +2,8 @@ FROM node:17-slim
 
 COPY package*.json .
 
+WORKDIR /app
+
 RUN npm install
 
 COPY . .
