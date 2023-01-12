@@ -1,29 +1,45 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
+const { Kafka, logLevel } = require('kafkajs');
+
 const app = express();
+const routes = require('./routes');
+
+const kafka = new Kafka({
+	clientId: 'jsapp',
+	brokers: ['kafka:9092'],
+	logLevel: logLevel.WARN,
+	retry: {
+		initialRetryTime: 300,
+		retries: 10,
+	},
+});
+const producer = kafka.producer();
+const consumer = kafka.consumer({ groupId: 'request-group-receiver' });
 
 app.use(express.json());
 
-app.get('/', async (req, res) => {
-	const files = fs.readdirSync('./files');
-	const output = files.map((name) => {
-		const fullPath = './files/' + name;
-		const content = fs.readFileSync(fullPath, { encoding: 'utf8' });
-		return { file: name, content };
+app.use((req, res, next) => {
+	req.producer = producer;
+	return next();
+});
+app.use(routes);
+
+const run = async () => {
+	await producer.connect();
+	await consumer.connect();
+
+	let topic = 'request';
+	// Code Consumer for test of read message
+	topic = 'teste';
+	await consumer.subscribe({ topic });
+
+	await consumer.run({
+		eachMessage: async ({ topic, partition, message }) => {
+			console.log('Resposta', String(message.value));
+		},
 	});
 
-	return res.status(200).json(output);
-});
+	app.listen(process.env.EXTERNALPORT, () => console.log(`Server listening at http://localhost:${process.env.EXTERNALPORT}`));
+};
 
-app.post('/', async (req, res) => {
-	try {
-		const { message } = req.body;
-		const output = `Init process of create file with message '${message}'`;
-		return res.status(200).json(output);
-	} catch (error) {
-		return res.status(500).json(error);
-	}
-});
-
-app.listen(process.env.EXTERNALPORT || 3000, () => console.log(`Server listening at http://localhost:${process.env.EXTERNALPORT || 3000}`));
+run().catch(console.error);
