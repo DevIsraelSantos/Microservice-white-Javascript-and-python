@@ -26,18 +26,17 @@ app.use(routes);
 
 const run = async () => {
 	await producer.connect();
-	await consumer.connect();
 
-	let topic = 'request';
 	// Code Consumer for test of read message
-	topic = 'teste';
-	await consumer.subscribe({ topic });
+	// await consumer.connect();
+	// let topic = 'request';
+	// await consumer.subscribe({ topic });
 
-	await consumer.run({
-		eachMessage: async ({ topic, partition, message }) => {
-			console.log('Resposta', String(message.value));
-		},
-	});
+	// await consumer.run({
+	// 	eachMessage: async ({ topic, partition, message }) => {
+	// 		console.log('Resposta', String(message.value));
+	// 	},
+	// });
 
 	app.listen(process.env.EXTERNALPORT, () => console.log(`Server listening at http://localhost:${process.env.EXTERNALPORT}`));
 };
