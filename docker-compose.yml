@@ -25,12 +25,21 @@ services:
     build:
       context: python
 
+    environment:
+      - KAFKA_TOPIC_NAME=request
+      - KAFKA_SERVER=kafka
+      - KAFKA_PORT=9092
+
     ports:
       - '80:80'
     volumes:
       - files:/app/files
 
     depends_on:
+      - kafka
+      - zookeeper
+
+    links:
       - kafka
 
   zookeeper:
@@ -49,15 +58,28 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: 'request:1:1, response-request:1:1'
 
-    links:
-      - zookeeper
-
     depends_on:
       - zookeeper
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+  kafdrop:
+    container_name: kafdrop
+    image: obsidiandynamics/kafdrop
+    restart: 'always'
+    ports:
+      - '9000:9000'
+
+    environment:
+      KAFKA_BROKERCONNECT: 'kafka:9092'
+
+    depends_on:
+      - kafka
+
+networks:
+  default:
+    driver: bridge
+
 volumes:
   files: {}
-  kafka-volume: {}

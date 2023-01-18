@@ -1,5 +1,5 @@
 const express = require('express');
-const { Kafka, logLevel } = require('kafkajs');
+const { Kafka, logLevel, Partitioners } = require('kafkajs');
 
 const app = express();
 const routes = require('./routes');
@@ -13,8 +13,8 @@ const kafka = new Kafka({
 		retries: 10,
 	},
 });
-const producer = kafka.producer();
-const consumer = kafka.consumer({ groupId: 'request-group-receiver' });
+const producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner });
+// const consumer = kafka.consumer({ groupId: 'request-group-receiver' });
 
 app.use(express.json());
 
@@ -29,7 +29,7 @@ const run = async () => {
 
 	// Code Consumer for test of read message
 	// await consumer.connect();
-	// let topic = 'request';
+	// let topic = 'topic-test';
 	// await consumer.subscribe({ topic });
 
 	// await consumer.run({
